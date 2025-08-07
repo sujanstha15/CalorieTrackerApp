@@ -1,5 +1,6 @@
 package com.calorietrackerapp.util;
 
+import com.calorietrackerapp.entity.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -19,6 +20,8 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
+
+    //generate JWT token
     public String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
@@ -26,5 +29,29 @@ public class JwtUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    //extract username from token
+    public String extractUsername(String token){
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+
+    }
+
+    //validate token
+    public boolean validateToken(String token, User user) {
+        String email = extractUsername(token);
+        Date expirationDate = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
+
+        return (email.equals(user.getEmail()) && !expirationDate.before(new Date()));
     }
 }
