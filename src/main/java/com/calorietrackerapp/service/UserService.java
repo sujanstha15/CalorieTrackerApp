@@ -1,30 +1,45 @@
 package com.calorietrackerapp.service;
 
-import com.calorietrackerapp.dto.UserRequestDTO;
-import com.calorietrackerapp.dto.UserResponseDTO;
+
+import com.calorietrackerapp.dto.RegisterUserDto;
 import com.calorietrackerapp.entity.User;
 import com.calorietrackerapp.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
-@RequiredArgsConstructor
 public class UserService {
-    private final UserRepository userRepository;
 
+    @Autowired
+    private UserRepository userRepository;
 
-    //to register new user
-    public UserResponseDTO registerUser(UserRequestDTO request){
-        //convert DTO to entity
+    @Autowired
+    private CalorieCalculatorService calorieCalculatorService;
+
+    public User register(RegisterUserDto dto){
         User user = new User();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
+        user.setAge(dto.getAge());
+        user.setHeight(dto.getHeight());
+        user.setWeight(dto.getWeight());
+        user.setGender(dto.getGender());
+        user.setActivityLevel(dto.getActivityLevel());
+        user.setGoal(dto.getGoal());
 
-        //saving to DB
-        User savedUser = userRepository.save(user);
+        double calories = calorieCalculatorService.calculateCalories(user);
 
-        //convert Entity to ResponseDTO
-        return new UserResponseDTO(savedUser.getId(), savedUser.getName(), savedUser.getEmail());
+        return userRepository.save(user);
+    }
+
+    public Optional<User> findById(Long id){
+        return userRepository.findById(id);
+    }
+
+    public Optional<User> findByEmail(String email){
+        return userRepository.findByEmail(email);
     }
 }

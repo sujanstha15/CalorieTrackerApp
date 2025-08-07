@@ -23,4 +23,11 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    private int age;
+    private double height;
+    private double weight;
+    private String gender;
+    private String activityLevel;
+    private String goal;
 }
